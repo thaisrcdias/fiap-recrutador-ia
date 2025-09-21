@@ -1,4 +1,3 @@
-# src/model_trainer.py
 import xgboost as xgb
 import joblib
 import numpy as np

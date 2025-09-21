@@ -15,9 +15,9 @@ PROSPECTS_FILE_PATH = 'prospects/prospects.json'
 APPLICANTS_FILE_PATH = 'applicants/applicants.json'
 BIGQUERY_PROJECT_ID = 'resolute-spirit-472116-f2'
 BIGQUERY_DATASET_ID = 'recrutamento'
-BIGQUERY_VAGAS_TABLE_ID = 'tb_vagas'
-BIGQUERY_PROSPECTS_TABLE_ID = 'tb_prospects'
-BIGQUERY_APPLICANTS_TABLE_ID = 'tb_applicants'
+BIGQUERY_VAGAS_TABLE_ID = 'vagas'
+BIGQUERY_PROSPECTS_TABLE_ID = 'prospects'
+BIGQUERY_APPLICANTS_TABLE_ID = 'applicants'
 BIGQUERY_VIEW_ID = 'vw_vagas_prospects_applicants_completo'
 # Configurações do BigQuery
 WRITE_DISPOSITION = "WRITE_TRUNCATE"
@@ -44,7 +44,7 @@ def process_and_load_data():
             **data.get('perfil_vaga', {}),
             **data.get('beneficios', {})
         }
-        # Renomeando coluna com espaço para ser compatível com BigQuery
+
         if 'nivel profissional' in flat_dict:
             flat_dict['nivel_profissional'] = flat_dict.pop('nivel profissional')
         vagas_list.append(flat_dict)
@@ -105,12 +105,12 @@ def load_table_from_dataframe(bq_client, df: pd.DataFrame, table_name: str):
 
     job_config = bigquery.LoadJobConfig(
         write_disposition=WRITE_DISPOSITION,
-        autodetect=True # Deixa o BigQuery detectar o schema a partir do DataFrame
+        autodetect=True
     )
 
     try:
         job = bq_client.load_table_from_dataframe(df, table_full_path, job_config=job_config)
-        job.result()  # Espera a conclusão do job
+        job.result()
         print(f"Tabela '{table_full_path}' carregada com {len(df)} registros.")
     except Exception as e:
         print(f"Erro ao carregar a tabela '{table_full_path}': {e}")

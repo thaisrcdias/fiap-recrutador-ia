@@ -8,7 +8,6 @@ class DataLoader:
     def __init__(self, project_id: str, view_full_path: str):
         self.project_id = project_id
         self.view_full_path = view_full_path
-        # Usa credenciais do ambiente (GOOGLE_APPLICATION_CREDENTIALS)
         self.client = bigquery.Client(project=self.project_id)
 
     def load_data(self) -> pd.DataFrame:
