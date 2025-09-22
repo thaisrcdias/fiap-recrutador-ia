@@ -5,7 +5,7 @@ from google.cloud import bigquery
 
 # Executar no VScode
 # $env:GOOGLE_APPLICATION_CREDENTIALS="C:\Users\thais.r.carvalho\Documents\Pos Machine Learning\Módulo 5\fiap-recrutador-ia\resolute-spirit-472116-f2-a11e1f97fbf0.json"
-# $env:GOOGLE_CLOUD_PROJECT="resolute-spirit-472116-f2" 
+# $env:PROJECT_ID="resolute-spirit-472116-f2" 
 
 
 # --- CONFIGURAÇÕES ---

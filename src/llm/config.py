@@ -19,7 +19,7 @@ class Config:
     llm_backend: str = os.getenv("LLM_BACKEND", "genai_sdk")  # "genai_sdk" | "rest_publisher"
     model_sdk: str = os.getenv("GENAI_MODEL", "gemini-2.0-pro-exp-02-05")
     model_rest: str = os.getenv("GEMINI_MODEL_REST", "gemini-2.5-flash-lite")
-    api_key: Optional[str] = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    api_key: Optional[str] = os.getenv("GOOGLE_API_KEY")
 
     # Colunas tolerantes ao schema da VIEW
     job_id_cols: Tuple[str, ...] = ("job_id", "id_vaga", "vaga_id", "codigo_vaga", "id")

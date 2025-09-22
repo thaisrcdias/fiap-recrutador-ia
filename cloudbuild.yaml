@@ -1,41 +1,63 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+  dynamic_substitutions: true
 
-steps:
-# 1) Install deps & train (opcional: removível se já tiver modelo)
-- name: 'python:3.11'
-  entrypoint: 'bash'
-  args:
-    - -lc
-    - |
-      pip install --no-cache-dir -r requirements.txt
-      python scripts/train.py || true
-
-# 2) Register model version (opcional)
-- name: 'python:3.11'
-  entrypoint: 'bash'
-  args:
-    - -lc
-    - |
-      pip install --no-cache-dir google-cloud-aiplatform google-cloud-storage
-      python scripts/register_model.py || true
-
-# 3) Build API image
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/recrutador-api:latest', '.']
-
-# 4) Push image
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/recrutador-api:latest']
-
-# 5) Deploy to Cloud Run
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: gcloud
-  args:
-    - run
-    - deploy
-    - recrutador-api
-    - --image=gcr.io/$PROJECT_ID/recrutador-api:latest
-    - --region=us-central1
-    - --allow-unauthenticated
+substitutions:
+  _REGION: us-central1
+  _REPO: images
+  _SERVICE: recrutador-ia-api
 
 images:
-- gcr.io/$PROJECT_ID/recrutador-api:latest
+- "${_REGION}-docker.pkg.dev/resolute-spirit-472116-f2/${_REPO}/${_SERVICE}:latest"
+
+steps:
+
+- name: 'python:3.11'
+  id: 'lint'
+  entrypoint: bash
+  args:
+    - -lc
+    - |
+      pip install --no-cache-dir --upgrade pip
+      if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      pip install ruff || true
+      ruff check . || true
+      
+- name: 'python:3.11'
+  id: 'tests'
+  entrypoint: bash
+  args:
+    - -lc
+    - |
+      pip install --no-cache-dir --upgrade pip
+      pip install -r requirements.txt
+      if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; else pip install pytest pytest-cov; fi
+      pytest -q --maxfail=1 --disable-warnings --cov=app --cov-report=xml
+
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build','-f','Dockerfile',
+         '-t','${_REGION}-docker.pkg.dev/resolute-spirit-472116-f2/${_REPO}/${_SERVICE}:latest','.'
+  ]
+  timeout: 2400s
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push','${_REGION}-docker.pkg.dev/resolute-spirit-472116-f2/${_REPO}/${_SERVICE}:latest']
+  timeout: 2400s
+
+
+- name: "gcr.io/cloud-builders/gcloud"
+  args:
+    [
+      "run",
+      "deploy",
+      "${_SERVICE}",
+      "--image",
+      "${_REGION}-docker.pkg.dev/resolute-spirit-472116-f2/${_REPO}/${_SERVICE}:latest",
+      "--region",
+      "${_REGION}",
+      "--allow-unauthenticated",
+      "--timeout", 
+      "3600s",
+      "--set-secrets","GOOGLE_API_KEY=GOOGLE_API_KEY:latest",
+    ]
