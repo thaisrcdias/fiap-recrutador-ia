@@ -10,8 +10,9 @@ VIEW_FULL_PATH = os.getenv("VIEW_FULL_PATH", "resolute-spirit-472116-f2.recrutam
 MODEL_PATH = os.getenv("MODEL_PATH", "saved_models/match_model.joblib")
 
 def main():
-    loader = DataLoader(PROJECT_ID, VIEW_FULL_PATH)
-    df = loader.load_data()
+    # loader = DataLoader(PROJECT_ID, VIEW_FULL_PATH)
+    # df = loader.load_data()
+    df = pd.read_csv('../base_gcp.csv', sep=';')
     if df.empty:
         print("Sem dados.")
         return

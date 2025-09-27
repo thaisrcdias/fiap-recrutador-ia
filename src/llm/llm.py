@@ -47,42 +47,47 @@ class PromptBuilder:
     @staticmethod
     def score_prompt(vaga_text: str, cv_relevant_text: str) -> str:
         schema = """
-Responda APENAS em JSON válido:
-{
-  "score": <int 0-100>,
-  "justificativa": ["bullet", "bullet", "bullet"]
-}
-"""
+                    Responda APENAS em JSON válido:
+                    {
+                    "score": <int 0-1000>,
+                    "justificativa": ["bullet", "bullet", "bullet"]
+                    }
+                    """
         return f"""
-Você é um especialista em RH Tech. Atribua um score 0–100 (técnico+fit+comunicação) com justificativas curtas.
+                    Você é um especialista em RH Tech.  
+                    
+                    Analise se o candidato possui perfil técnico para vaga. 
+                    As informações do currículo do candidato devem se parecidas com a descrição da vaga.
+                    Dê mais peso para tempo de experiência na área da vaga.  
 
-Vaga:
-{vaga_text}
+                    Vaga:
+                    {vaga_text}
 
-Trechos do CV:
-{cv_relevant_text}
+                    Trechos do currículo:
+                    {cv_relevant_text}
 
-Tarefa:
-Avalie aderência geral do candidato à vaga.
-{schema}
-""".strip()
+                    Tarefa:
+                    Atribua um score 0–1000, sendo 0 para não aderente a vaga e 1000 muito aderente a vaga. Avalie aderência geral do candidato à vaga com justificativas curtas.
+                    {schema}
+                """.strip()
 
     @staticmethod
     def triage_prompt(vaga_text: str, cv_relevant_text: str, n: int = 2) -> str:
         n = max(1, min(2, int(n)))
         return f"""
-Você é um recrutador técnico.
-Gere {n} perguntas objetivas de triagem (confirmar experiência/idioma quando aplicável).
+                Você é um recrutador técnico.
+                Gere {n/2} perguntas objetivas de triagem (confirmar experiência/idioma quando aplicável).
+                Gere também {n/2} perguntas sobre o perfil técnico da vaga. Monte uma sabatina de {n/2} perguntas para o candidato com exemplos de código.
 
-Vaga:
-{vaga_text}
+                Vaga:
+                {vaga_text}
 
-Trechos do CV:
-{cv_relevant_text}
+                Trechos do CV:
+                {cv_relevant_text}
 
-Responda APENAS em JSON:
-{{"perguntas": ["...", "..."]}}
-""".strip()
+                Responda APENAS em JSON:
+                {{"perguntas": ["...", "..."]}}
+                """.strip()
 
 class LLMClient:
     """Encapsula chamada ao Gemini (SDK/REST)."""
