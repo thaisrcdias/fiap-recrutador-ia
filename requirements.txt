@@ -2,7 +2,6 @@
 fastapi
 uvicorn[standard]
 google-cloud-aiplatform
-google-cloud-bigquery
 python-multipart
 pdfplumber
 python-docx

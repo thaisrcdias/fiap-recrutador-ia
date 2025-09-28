@@ -13,20 +13,20 @@ class Config:
     )
 
     # Caminho do bundle do modelo clássico (preprocessor + modelo) salvo no treino
-    model_path: str = os.getenv("MODEL_PATH", "app/saved_models/match_model.joblib")
+    # model_path: str = os.getenv("MODEL_PATH", "app/saved_models/match_model.joblib")
+    model_path: str = os.getenv("MODEL_PATH", "gs://resolute-spirit-472116-f2-mlops-artifacts/models/recrutador-match/v1/match_model.joblib")
+
 
     # LLM
-    llm_backend: str = os.getenv("LLM_BACKEND", "genai_sdk")  # "genai_sdk" | "rest_publisher"
+    llm_backend: str = os.getenv("LLM_BACKEND", "genai_sdk")
     model_sdk: str = os.getenv("GENAI_MODEL", "gemini-2.0-pro-exp-02-05")
     model_rest: str = os.getenv("GEMINI_MODEL_REST", "gemini-2.5-flash-lite")
-    # api_key: Optional[str] = os.getenv("GOOGLE_API_KEY")
-    api_key: Optional[str] = "AQ.Ab8RN6LaFGNggv2lwVRkAsAaQBw99AwDOBH7LoVk9vFeJfnKZw"
+    api_key: Optional[str] = os.getenv("GOOGLE_API_KEY")
 
     # Colunas tolerantes ao schema da VIEW
     job_id_cols: Tuple[str, ...] = ("job_id", "id_vaga", "vaga_id", "codigo_vaga", "id")
     applicant_id_cols: Tuple[str, ...] = ("id_applicant", "applicant_id", "codigo_profissional", "codigo", "id_candidato", "id")
 
-    # Conteúdo
     col_titulo_vaga: str = "titulo_vaga"
     col_nivel_vaga: str = "nivel_vaga"
     col_conh_vaga: str = "conhecimentos_tecnicos_vaga"
@@ -39,6 +39,5 @@ class Config:
     col_nome_2: str = "nome"
     col_nome_3: str = "nome_completo"
 
-    # Política
     reprova_threshold: int = int(os.getenv("REPROVA_THRESHOLD", "45"))
     triage_questions: int = int(os.getenv("TRIAGE_QUESTIONS", "2"))

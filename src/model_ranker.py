@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 import os
 from functools import lru_cache
-from typing import List
+from typing import List, Dict
+import re
+import hashlib
 
 import joblib
 import numpy as np
@@ -11,6 +13,7 @@ import pandas as pd
 from .llm.config import Config
 
 logger = logging.getLogger(__name__)
+_GCS_URI_RE = re.compile(r"^gs://([^/]+)/(.+)$")
 
 # Lista de skills simples para extrair do texto do CV (ilustrativo)
 SKILLS = [
@@ -18,6 +21,67 @@ SKILLS = [
     "aws", "gcp", "sap", "oracle", "linux",
     "docker", "kubernetes", "airflow", "etl", "devops",
 ]
+
+def _is_gcs_uri(path: str) -> bool:
+    return bool(_GCS_URI_RE.match(path or ""))
+
+def _download_gcs_to_local(gcs_uri: str) -> str:
+    """Baixa o arquivo do GCS para um caminho local (cacheável) e retorna o path local."""
+    from google.cloud import storage  # dep: google-cloud-storage
+
+    m = _GCS_URI_RE.match(gcs_uri)
+    if not m:
+        raise ValueError(f"URI GCS inválida: {gcs_uri}")
+    bucket_name, blob_name = m.group(1), m.group(2)
+
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+
+    if not blob.exists(client):
+        raise FileNotFoundError(f"Objeto não encontrado no GCS: {gcs_uri}")
+
+    # Carrega metadados para pegar 'generation' (muda a cada upload)
+    blob.reload()
+    generation = str(blob.generation or "")
+    etag = (blob.etag or "").strip('"')
+
+    cache_dir = os.getenv("MODEL_CACHE_DIR", "/tmp")
+    os.makedirs(cache_dir, exist_ok=True)
+
+    # Nome do arquivo de cache incorpora URI+generation para invalidar em novos uploads
+    key = f"{gcs_uri}@{generation or etag}"
+    fname = f"model_{hashlib.sha1(key.encode('utf-8')).hexdigest()}.joblib"
+    local_path = os.path.join(cache_dir, fname)
+
+    if not os.path.exists(local_path):
+        logger.info("Baixando modelo do GCS: %s (generation=%s)", gcs_uri, generation or "n/a")
+        blob.download_to_filename(local_path)
+    else:
+        logger.info("Usando modelo em cache: %s", local_path)
+
+    return local_path
+
+@lru_cache(maxsize=4)
+def _load_bundle(model_path: str) -> Dict:
+    """Carrega e cacheia o bundle {preprocessor, model} de caminho local ou gs://."""
+    if _is_gcs_uri(model_path):
+        local_path = _download_gcs_to_local(model_path)
+        path_to_load = local_path
+    else:
+        path_to_load = model_path
+        if not os.path.exists(path_to_load):
+            logger.error("Modelo não encontrado em: %s", path_to_load)
+            raise FileNotFoundError(f"Modelo não encontrado em: {path_to_load}")
+
+    logger.info("Carregando bundle de modelo: %s", model_path)
+    bundle = joblib.load(path_to_load)
+
+    if not isinstance(bundle, dict) or "preprocessor" not in bundle or "model" not in bundle:
+        logger.error("Bundle inválido: chaves esperadas {'preprocessor','model'} ausentes.")
+        raise RuntimeError("Bundle inválido: chaves esperadas {'preprocessor','model'} ausentes.")
+
+    return bundle
 
 
 def _ensure_feature_columns(df: pd.DataFrame, cfg: Config) -> pd.DataFrame:
@@ -58,32 +122,32 @@ def _skills_from_text(text: str) -> List[str]:
     return [s for s in SKILLS if s in t]
 
 
-@lru_cache(maxsize=4)
-def _load_bundle(model_path: str) -> dict:
-    """Carrega e cacheia o bundle {preprocessor, model} salvo via joblib.
+# @lru_cache(maxsize=4)
+# def _load_bundle(model_path: str) -> dict:
+#     """Carrega e cacheia o bundle {preprocessor, model} salvo via joblib.
 
-    O cache evita re-load em chamadas repetidas. Para invalidar, troque o path
-    ou reinicie o processo (ou mude o maxsize, se necessário).
+#     O cache evita re-load em chamadas repetidas. Para invalidar, troque o path
+#     ou reinicie o processo (ou mude o maxsize, se necessário).
 
-    Args:
-        model_path: Caminho do arquivo .joblib serializado.
+#     Args:
+#         model_path: Caminho do arquivo .joblib serializado.
 
-    Returns:
-        Dicionário com chaves 'preprocessor' e 'model'.
+#     Returns:
+#         Dicionário com chaves 'preprocessor' e 'model'.
 
-    Raises:
-        FileNotFoundError: Se o caminho do modelo não existir.
-        RuntimeError: Se o bundle não tiver as chaves esperadas.
-    """
-    if not os.path.exists(model_path):
-        logger.error("Modelo não encontrado em: %s", model_path)
-        raise FileNotFoundError(f"Modelo não encontrado em: {model_path}")
-    logger.info("Carregando bundle de modelo: %s", model_path)
-    bundle = joblib.load(model_path)
-    if not isinstance(bundle, dict) or "preprocessor" not in bundle or "model" not in bundle:
-        logger.error("Bundle inválido: chaves esperadas {'preprocessor','model'} ausentes.")
-        raise RuntimeError("Bundle inválido: chaves esperadas {'preprocessor','model'} ausentes.")
-    return bundle
+#     Raises:
+#         FileNotFoundError: Se o caminho do modelo não existir.
+#         RuntimeError: Se o bundle não tiver as chaves esperadas.
+#     """
+#     if not os.path.exists(model_path):
+#         logger.error("Modelo não encontrado em: %s", model_path)
+#         raise FileNotFoundError(f"Modelo não encontrado em: {model_path}")
+#     logger.info("Carregando bundle de modelo: %s", model_path)
+#     bundle = joblib.load(model_path)
+#     if not isinstance(bundle, dict) or "preprocessor" not in bundle or "model" not in bundle:
+#         logger.error("Bundle inválido: chaves esperadas {'preprocessor','model'} ausentes.")
+#         raise RuntimeError("Bundle inválido: chaves esperadas {'preprocessor','model'} ausentes.")
+#     return bundle
 
 
 def rank_top_k_for_job(

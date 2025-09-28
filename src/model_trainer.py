@@ -59,11 +59,58 @@ class ModelTrainer:
         print(classification_report(y_test, y_pred, target_names=['Não Encaminhado', 'Encaminhado']))
         print("--------------------------\n")
 
+    # def save_pipeline(self, preprocessor_pipeline):
+    #     """Salva o pipeline de pré-processamento e o modelo juntos."""
+    #     full_pipeline = {
+    #         'preprocessor': preprocessor_pipeline,
+    #         'model': self.model
+    #     }
+    #     joblib.dump(full_pipeline, "saved_models/match_model.joblib")
+    #     print("Pipeline completo salvo em: saved_models/match_model.joblib")
+
+
     def save_pipeline(self, preprocessor_pipeline):
-        """Salva o pipeline de pré-processamento e o modelo juntos."""
+        import os
+        import tempfile
+        """
+        Salva o pipeline completo (preprocessador + modelo).
+        - Se model_path começar com 'gs://', salva localmente em arquivo temporário e faz upload ao GCS.
+        - Caso contrário, salva em disco local criando a pasta se necessário.
+        """
+        if self.model is None:
+            raise RuntimeError("Modelo ainda não treinado. Chame .train() antes de salvar.")
+
         full_pipeline = {
-            'preprocessor': preprocessor_pipeline,
-            'model': self.model
+            "preprocessor": preprocessor_pipeline,
+            "model": self.model,
         }
-        joblib.dump(full_pipeline, self.model_path)
-        print(f"Pipeline completo salvo em: {self.model_path}")
+
+        dest = self.model_path
+        if dest.startswith("gs://"):
+            # 1) salva em temp local
+            suffix = os.path.splitext(dest)[-1] or ".joblib"
+            fd, tmp_path = tempfile.mkstemp(suffix=suffix)
+            os.close(fd)
+
+            print("Salvando bundle temporário em: %s", tmp_path)
+            joblib.dump(full_pipeline, tmp_path)
+
+            # 2) faz upload para GCS
+            from google.cloud import storage
+            _, _, bucket_name, *blob_parts = dest.split("/")
+            blob_path = "/".join(blob_parts)
+            client = storage.Client()
+            bucket = client.bucket(bucket_name)
+            blob = bucket.blob(blob_path)
+            print("Enviando artefato para GCS: gs://%s/%s", bucket_name, blob_path)
+            blob.upload_from_filename(tmp_path)
+            os.remove(tmp_path)
+            print("Bundle salvo no GCS em: %s", dest)
+            return dest
+        else:
+            # salvar localmente
+            os.makedirs(os.path.dirname(dest) or ".", exist_ok=True)
+            print("Salvando bundle local em: %s", dest)
+            joblib.dump(full_pipeline, dest)
+            print("Bundle salvo em: %s", dest)
+            return dest

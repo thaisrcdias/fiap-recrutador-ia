@@ -20,7 +20,7 @@ except LookupError:
 def _clean_text(txt: str) -> str:
     """Normaliza texto: minúsculo, sem acentos, sem excesso de espaços."""
     txt = unidecode(str(txt).lower())
-    txt = re.sub(r'\s+', ' ', txt)  # substitui múltiplos espaços
+    txt = re.sub(r'\s+', ' ', txt)
     return txt.strip()
 
 
@@ -74,7 +74,6 @@ class Preprocessor:
             dfc['conhecimentos_tecnicos_candidato'].astype(str)
         )
 
-        # Limpeza básica dos textos
         for col in ['texto_vaga', 'texto_candidato']:
             dfc[col] = dfc[col].map(_clean_text)
 
