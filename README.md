@@ -102,6 +102,9 @@ fiap-recrutador-ia/
 ├──├── test_model_trainer.py
 ├──├── test_preprocessor.py
 ├──├── test_routes.py
+├──├── test_llm_utils.py
+├──├── test_llm_matcher.py
+├──├── test_llm_data_repo.py
 
 ├── Dockerfile
 ├── requirements.txt
