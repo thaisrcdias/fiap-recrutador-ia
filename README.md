@@ -11,7 +11,7 @@ Este projeto é uma aplicação de recrutamento que utiliza inteligência artifi
     - Cloud Run
     - Cloud Build
     - Artifactory Registry
-- RestAPI
+- Fast API
 
 ## Como Executar
 
