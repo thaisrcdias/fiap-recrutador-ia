@@ -6,8 +6,11 @@ Este projeto é uma aplicação de recrutamento que utiliza inteligência artifi
 
 - Python
 - Google Cloud
-    - Vertex AI
+    - Vertex AI Studio
     - BigQuery
+    - Cloud Run
+    - Cloud Build
+    - Artifactory Registry
 - RestAPI
 
 ## Como Executar
