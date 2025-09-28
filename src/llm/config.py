@@ -13,7 +13,9 @@ class Config:
     )
 
     # Caminho do bundle do modelo clássico (preprocessor + modelo) salvo no treino
-    model_path: str = os.getenv("MODEL_PATH", "app/saved_models/match_model.joblib")
+    # model_path: str = os.getenv("MODEL_PATH", "app/saved_models/match_model.joblib")
+    model_path: str = os.getenv("MODEL_PATH", "gs://resolute-spirit-472116-f2-mlops-artifacts/models/recrutador-match/v1/match_model.joblib")
+
 
     # LLM
     llm_backend: str = os.getenv("LLM_BACKEND", "genai_sdk")  # "genai_sdk" | "rest_publisher"

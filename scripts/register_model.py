@@ -5,7 +5,8 @@ from google.cloud import aiplatform
 PROJECT_ID = os.getenv("PROJECT_ID", "resolute-spirit-472116-f2")
 REGION = os.getenv("REGION", "us-central1")
 BUCKET = os.getenv("BUCKET", f"{PROJECT_ID}-mlops-artifacts")
-LOCAL_MODEL_PATH = os.getenv("LOCAL_MODEL_PATH", "saved_models/match_model.joblib")
+LOCAL_MODEL_PATH = os.getenv("MODEL_PATH", "gs://resolute-spirit-472116-f2-mlops-artifacts/models/recrutador-match/v1/match_model.joblib")
+# LOCAL_MODEL_PATH = os.getenv("LOCAL_MODEL_PATH", "saved_models/match_model.joblib")
 MODEL_NAME = os.getenv("MODEL_NAME", "recrutador-match")
 
 timestamp = datetime.datetime.utcnow().strftime("%Y%m%d-%H%M%S")

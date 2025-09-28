@@ -5,7 +5,7 @@ options:
 substitutions:
   _REGION: us-central1
   _REPO: images
-  _SERVICE: recrutador-ia-api
+  _SERVICE: recrutador-ia-api-final
 
 images:
 - "${_REGION}-docker.pkg.dev/resolute-spirit-472116-f2/${_REPO}/${_SERVICE}:latest"
@@ -60,4 +60,6 @@ steps:
       "--timeout", 
       "3600s",
       "--set-secrets","GOOGLE_API_KEY=GOOGLE_API_KEY:latest",
+      "--memory","4Gi",
+      "--cpu","2"
     ]
