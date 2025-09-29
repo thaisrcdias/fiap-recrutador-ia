@@ -149,6 +149,12 @@ fiap-recrutador-ia/
 
 ## CI/CD
 
+O deploy da imagem docker no artifactory registry e publicação da api via cloud run, é realizado através do arquivo cloudbuild.yaml
+
+```gcloud builds submit --config cloudbuild.yaml ```
+
+Observação: É preciso estar autenticado na gcp e com o projeto setado.
+
 <img width="2223" height="570" alt="image" src="https://github.com/user-attachments/assets/48ed3f0a-8a46-4f54-989b-084fbec52678" />
 
 
