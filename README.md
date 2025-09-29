@@ -36,7 +36,7 @@ Este projeto é uma aplicação de recrutamento que utiliza inteligência artifi
 
 ## Arquitetura
 
-![Diagrama da Arquitetura](api_model_fase5.png)
+![Diagrama da Arquitetura](api_model_fase5.PNG)
 
 1. **Ingestão de dados**  
    Arquivos JSON de vagas/candidatos são enviados para o **Cloud Storage**.
