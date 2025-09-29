@@ -34,6 +34,37 @@ Este projeto é uma aplicação de recrutamento que utiliza inteligência artifi
     uvicorn app.main:app --reload
     ```
 
+## Arquitetura
+
+![Diagrama da Arquitetura](api_model_fase5.png)
+
+1. **Ingestão de dados**  
+   Arquivos JSON de vagas/candidatos são enviados para o **Cloud Storage**.
+
+2. **ETL**  
+   O **Cloud Functions** processa os dados e carrega no **BigQuery**.
+
+3. **API (FastAPI em Cloud Run)**  
+   - `/top10`: retorna os 10 melhores candidatos para uma vaga usando um modelo de ML.  
+   - `/predict`: gera score de match, justificativa e perguntas de entrevista usando um LLM.  
+
+4. **CI/CD e Containerização**  
+   - **Cloud Build** gera imagens Docker.  
+   - **Artifact Registry** armazena as imagens.  
+   - **Cloud Run** executa a API em escala serverless.  
+
+5. **Segurança e Observabilidade**  
+   - **Secret Manager + IAM** protegem o token do LLM (Vertex AI).  
+   - **Cloud Logging** centraliza logs e métricas.  
+
+### Benefícios
+
+- Arquitetura **serverless** → escalável e com baixo custo ocioso.  
+- **BigQuery** para consultas rápidas e integradas.  
+- **CI/CD** automatizado com Cloud Build + Artifact Registry.  
+- **Segurança by design** com Secret Manager e IAM.  
+
+
 # Modelos de IA e IA Gen
 
 ## Treinamento do Modelo de IA
