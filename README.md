@@ -157,6 +157,14 @@ O deploy da imagem Docker no Artifactory Registry e publicação da api via Clou
 
 <img width="2223" height="570" alt="image" src="https://github.com/user-attachments/assets/48ed3f0a-8a46-4f54-989b-084fbec52678" />
 
+## API
+
+https://recrutador-ia-api-final-97347961764.us-central1.run.app
+
+- Endpoints:
+<img width="1860" height="549" alt="image" src="https://github.com/user-attachments/assets/0f01488c-6dbf-4ce0-8653-2d3beb5ffd5b" />
+
+
 
 ## Monitoring
 
