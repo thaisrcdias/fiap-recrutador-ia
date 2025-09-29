@@ -156,6 +156,11 @@ fiap-recrutador-ia/
 
 <img width="2506" height="1235" alt="image" src="https://github.com/user-attachments/assets/8a65a69c-3186-428e-9c34-8bbd13699c17" />
 
+- Cloud Logging
+
+<img width="2401" height="1184" alt="image" src="https://github.com/user-attachments/assets/e95cd5f5-db1d-424c-85b9-fca72c24b89e" />
+
+
 
 
 
