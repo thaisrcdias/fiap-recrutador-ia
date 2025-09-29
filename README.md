@@ -141,3 +141,21 @@ fiap-recrutador-ia/
 ├── requirements.txt
 ├── README.md
 ```
+
+## Cobertura dos Testes Unitários
+
+![IMG-20250925-WA0093](https://github.com/user-attachments/assets/c56b6383-2ba8-4e35-b3d9-1d6ca20e1e31)
+
+
+## CI/CD
+
+<img width="2223" height="570" alt="image" src="https://github.com/user-attachments/assets/48ed3f0a-8a46-4f54-989b-084fbec52678" />
+
+
+## Monitoring
+
+<img width="2506" height="1235" alt="image" src="https://github.com/user-attachments/assets/8a65a69c-3186-428e-9c34-8bbd13699c17" />
+
+
+
+
